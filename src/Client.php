@@ -71,7 +71,7 @@ class Client implements HttpClientInterface
             $options[\BrokeYourBike\HasSourceModel\Enums\RequestOptions::SOURCE_MODEL] = $transaction;
         }
 
-        $uri = (string) $this->resolveUriFor($this->config->getUrl(), '/coreapi/api/finacle/PostingTransaction');
+        $uri = (string) $this->resolveUriFor($this->config->getUrl(), 'coreapi/api/finacle/PostingTransaction');
         $response = $this->httpClient->request(HttpMethodEnum::POST->value, $uri, $options);
 
         return new TransactionResponse($response);
