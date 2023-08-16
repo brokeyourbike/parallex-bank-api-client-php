@@ -6,14 +6,17 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this file,
 // You can obtain one at https://mozilla.org/MPL/2.0/.
 
-namespace BrokeYourBike\ParallexBank\Enums;
+namespace BrokeYourBike\ParallexBank\Responses;
+
+use BrokeYourBike\DataTransferObject\JsonResponse;
 
 /**
  * @author Ivan Stasiuk <ivan@stasi.uk>
  */
-enum ErrorCodeEnum: string
+class LoginResponse extends JsonResponse
 {
-    case SUCCESS = '00';
-    case DUPLICATE_TRANSACTION = '41';
-    case INVALID_DEBIT_ACCOUNT = '45';
+    public string $responseCode;
+    public string $responseMessage;
+    public ?string $token;
+    public ?string $expiration;
 }

@@ -29,10 +29,14 @@ class ClientTest extends TestCase
         /** @var \GuzzleHttp\ClientInterface */
         $mockedHttpClient = $this->getMockBuilder(\GuzzleHttp\ClientInterface::class)->getMock();
 
-        $api = new Client($mockedConfig, $mockedHttpClient);
+        /** @var \Psr\SimpleCache\CacheInterface */
+        $mockedCache = $this->getMockBuilder(\Psr\SimpleCache\CacheInterface::class)->getMock();
 
-        $this->assertInstanceOf(HttpClientInterface::class, $api);
-        $this->assertSame($mockedConfig, $api->getConfig());
+        $client = new Client($mockedConfig, $mockedHttpClient, $mockedCache);
+
+        $this->assertInstanceOf(HttpClientInterface::class, $client);
+        $this->assertSame($mockedConfig, $client->getConfig());
+        $this->assertSame($mockedCache, $client->getCache());
     }
 
     /** @test */

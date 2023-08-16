@@ -17,7 +17,7 @@ interface TransactionInterface
 {
     public function getReference(): string;
     public function getAmount(): float;
-    public function getBankCode(): string;
-    public function getBankAccount(): string;
-    public function getValueDate(): CarbonImmutable;
+    public function getAccountNumber(): string;
+    public function getRecipientName(): string;
+    public function getTransactionDate(): CarbonImmutable;
 }

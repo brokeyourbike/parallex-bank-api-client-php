@@ -8,9 +8,12 @@
 
 namespace BrokeYourBike\ParallexBank;
 
+use Psr\SimpleCache\CacheInterface;
 use GuzzleHttp\ClientInterface;
+use Carbon\Carbon;
 use BrokeYourBike\ResolveUri\ResolveUriTrait;
-use BrokeYourBike\ParallexBank\Models\TransactionResponse;
+use BrokeYourBike\ParallexBank\Responses\TransactionResponse;
+use BrokeYourBike\ParallexBank\Responses\LoginResponse;
 use BrokeYourBike\ParallexBank\Interfaces\TransactionInterface;
 use BrokeYourBike\ParallexBank\Interfaces\ConfigInterface;
 use BrokeYourBike\HttpEnums\HttpMethodEnum;
@@ -29,11 +32,13 @@ class Client implements HttpClientInterface
     use HasSourceModelTrait;
 
     private ConfigInterface $config;
+    private CacheInterface $cache;
 
-    public function __construct(ConfigInterface $config, ClientInterface $httpClient)
+    public function __construct(ConfigInterface $config, ClientInterface $httpClient, CacheInterface $cache)
     {
         $this->config = $config;
         $this->httpClient = $httpClient;
+        $this->cache = $cache;
     }
 
     public function getConfig(): ConfigInterface
@@ -41,29 +46,82 @@ class Client implements HttpClientInterface
         return $this->config;
     }
 
-    public function postTransaction(string $requestId, TransactionInterface $transaction): TransactionResponse
+    public function getCache(): CacheInterface
+    {
+        return $this->cache;
+    }
+
+    public function authTokenCacheKey(): string
+    {
+        return get_class($this) . ':authToken:';
+    }
+
+    public function getAuthToken(): ?string
+    {
+        if ($this->cache->has($this->authTokenCacheKey())) {
+            $cachedToken = $this->cache->get($this->authTokenCacheKey());
+
+            if (is_string($cachedToken)) {
+                return $cachedToken;
+            }
+        }
+
+        $response = $this->fetchAuthTokenRaw();
+
+        if ($response->token === null) {
+            return $response->token;
+        }
+
+        $expireAt = Carbon::parse($response->expiration);
+
+        $this->cache->set(
+            $this->authTokenCacheKey(),
+            $response->token,
+            (Carbon::now())->diffInSeconds($expireAt) - 60
+        );
+
+        return $response->token;
+    }
+
+    public function fetchAuthTokenRaw(): LoginResponse
     {
         $options = [
             \GuzzleHttp\RequestOptions::HEADERS => [
                 'Accept' => 'application/json',
-                'Client-Id' => $this->config->getClientId(),
-                'Client-Key' => $this->config->getClientSecret(),
             ],
             \GuzzleHttp\RequestOptions::JSON => [
-                'BankId' => $transaction->getBankCode(),
-                'TrnType' => 'T',
-                'TrnSubType' => 'CI',
-                'RequestID' => $requestId,
-                'PartTrnRec' => [
-                    [
-                        'AcctId' => $transaction->getBankAccount(),
-                        'CreditDebitFlg' => 'D',
-                        'TrnAmt' => $transaction->getAmount(),
-                        'CurrencyCode' => $transaction->getCurrencyCode(),
-                        'TrnParticulars' => $transaction->getReference(),
-                        'ValueDt' => $transaction->getValueDate()->format('Y-m-d\TH:i:s.uP'),
-                    ]
-                ],
+                'username' => $this->config->getUsername(),
+                'password' => $this->config->getPassword(),
+            ],
+        ];
+
+        $uri = (string) $this->resolveUriFor($this->config->getUrl(), 'api/ThirdPartyTransfer/Login');
+        $response = $this->httpClient->request(HttpMethodEnum::POST->value, $uri, $options);
+        return new LoginResponse($response);
+    }
+
+    public function postTransaction(TransactionInterface $transaction): TransactionResponse
+    {
+        $options = [
+            \GuzzleHttp\RequestOptions::HEADERS => [
+                'Accept' => 'application/json',
+                'Authorization' => "Bearer {$this->getAuthToken()}",
+            ],
+            \GuzzleHttp\RequestOptions::JSON => [
+                'transactionDate' => $transaction->getTransactionDate()->format('Y-m-d'),
+                'transactionID' => $transaction->getReference(),
+                'credits' => [[
+                    'accountToDebit' => $transaction->getAccountNumber(),
+                    'accountName' => $transaction->getRecipientName(),
+                    'amount' => $transaction->getAmount(),
+                    'naration' => $transaction->getReference(),
+                ]],
+                'debits' => [[
+                    'accountToDebit' => $this->config->getDebitAccountNumber(),
+                    'accountName' => $this->config->getDebitAccountName(),
+                    'amount' => $transaction->getAmount(),
+                    'naration' => $transaction->getReference(),
+                ]],
             ],
         ];
 
@@ -71,9 +129,8 @@ class Client implements HttpClientInterface
             $options[\BrokeYourBike\HasSourceModel\Enums\RequestOptions::SOURCE_MODEL] = $transaction;
         }
 
-        $uri = (string) $this->resolveUriFor($this->config->getUrl(), 'coreapi/api/finacle/PostingTransaction');
+        $uri = (string) $this->resolveUriFor($this->config->getUrl(), 'api/ThirdPartyTransfer/BulkTransfer');
         $response = $this->httpClient->request(HttpMethodEnum::POST->value, $uri, $options);
-
         return new TransactionResponse($response);
     }
 }
