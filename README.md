@@ -21,9 +21,10 @@ use BrokeYourBike\ParallexBank\Interfaces\ConfigInterface;
 
 assert($config instanceof ConfigInterface);
 assert($httpClient instanceof \GuzzleHttp\ClientInterface);
+assert($psrCache instanceof \Psr\SimpleCache\CacheInterface);
 
-$apiClient = new Client($config, $httpClient);
-$apiClient->postTransaction();
+$apiClient = new Client($config, $httpClient, $psrCache);
+$apiClient->getAuthToken();
 ```
 
 ## Authors
