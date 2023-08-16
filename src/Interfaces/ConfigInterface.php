@@ -14,6 +14,8 @@ namespace BrokeYourBike\ParallexBank\Interfaces;
 interface ConfigInterface
 {
     public function getUrl(): string;
-    public function getClientId(): string;
-    public function getClientSecret(): string;
+    public function getUsername(): string;
+    public function getPassword(): string;
+    public function getDebitAccountNumber(): string;
+    public function getDebitAccountName(): string;
 }

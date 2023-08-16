@@ -6,14 +6,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this file,
 // You can obtain one at https://mozilla.org/MPL/2.0/.
 
-namespace BrokeYourBike\ParallexBank\Models;
+namespace BrokeYourBike\ParallexBank\Responses;
 
-use Spatie\DataTransferObject\Attributes\MapFrom;
 use BrokeYourBike\DataTransferObject\JsonResponse;
 
 /**
  * @author Ivan Stasiuk <ivan@stasi.uk>
  */
 class TransactionResponse extends JsonResponse
-{}
+{
+    public string $responseCode;
+    public string $responseDescription;
+}
 
