@@ -13,7 +13,7 @@ use BrokeYourBike\DataTransferObject\JsonResponse;
 /**
  * @author Ivan Stasiuk <ivan@stasi.uk>
  */
-class TransactionResponse extends JsonResponse
+class TransferResponse extends JsonResponse
 {
     public string $responseCode;
     public string $responseDescription;

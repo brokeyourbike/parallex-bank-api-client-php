@@ -12,7 +12,7 @@ use Psr\SimpleCache\CacheInterface;
 use GuzzleHttp\ClientInterface;
 use Carbon\Carbon;
 use BrokeYourBike\ResolveUri\ResolveUriTrait;
-use BrokeYourBike\ParallexBank\Responses\TransactionResponse;
+use BrokeYourBike\ParallexBank\Responses\TransferResponse;
 use BrokeYourBike\ParallexBank\Responses\LoginResponse;
 use BrokeYourBike\ParallexBank\Interfaces\TransactionInterface;
 use BrokeYourBike\ParallexBank\Interfaces\ConfigInterface;
@@ -100,7 +100,7 @@ class Client implements HttpClientInterface
         return new LoginResponse($response);
     }
 
-    public function postTransaction(TransactionInterface $transaction): TransactionResponse
+    public function transfer(TransactionInterface $transaction): TransferResponse
     {
         $options = [
             \GuzzleHttp\RequestOptions::HEADERS => [
@@ -113,13 +113,13 @@ class Client implements HttpClientInterface
                 'credits' => [[
                     'accountToDebit' => $transaction->getAccountNumber(),
                     'accountName' => $transaction->getRecipientName(),
-                    'amount' => $transaction->getAmount(),
+                    'amount' => (string) $transaction->getAmount(),
                     'naration' => $transaction->getReference(),
                 ]],
                 'debits' => [[
                     'accountToDebit' => $this->config->getDebitAccountNumber(),
                     'accountName' => $this->config->getDebitAccountName(),
-                    'amount' => $transaction->getAmount(),
+                    'amount' => (string) $transaction->getAmount(),
                     'naration' => $transaction->getReference(),
                 ]],
             ],
@@ -131,6 +131,6 @@ class Client implements HttpClientInterface
 
         $uri = (string) $this->resolveUriFor($this->config->getUrl(), 'api/ThirdPartyTransfer/BulkTransfer');
         $response = $this->httpClient->request(HttpMethodEnum::POST->value, $uri, $options);
-        return new TransactionResponse($response);
+        return new TransferResponse($response);
     }
 }
