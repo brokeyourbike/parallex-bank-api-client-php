@@ -2,8 +2,6 @@
 
 [![Latest Stable Version](https://img.shields.io/github/v/release/brokeyourbike/parallex-bank-api-client-php)](https://github.com/brokeyourbike/parallex-bank-api-client-php/releases)
 [![Total Downloads](https://poser.pugx.org/brokeyourbike/parallex-bank-api-client/downloads)](https://packagist.org/packages/brokeyourbike/parallex-bank-api-client)
-[![Maintainability](https://api.codeclimate.com/v1/badges/b42d6d359e4f7fc486fb/maintainability)](https://codeclimate.com/github/brokeyourbike/parallex-bank-api-client-php/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/b42d6d359e4f7fc486fb/test_coverage)](https://codeclimate.com/github/brokeyourbike/parallex-bank-api-client-php/test_coverage)
 
 Parallex Bank API Client for PHP
 

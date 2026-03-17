@@ -95,6 +95,10 @@ class Client implements HttpClientInterface
             ],
         ];
 
+        if ($this->getSourceModel() != null){
+            $options[\BrokeYourBike\HasSourceModel\Enums\RequestOptions::SOURCE_MODEL] = $this->getSourceModel();
+        }
+
         $uri = (string) $this->resolveUriFor($this->config->getUrl(), 'api/ThirdPartyTransfer/Login');
         $response = $this->httpClient->request(HttpMethodEnum::POST->value, $uri, $options);
         return new LoginResponse($response);
@@ -125,8 +129,8 @@ class Client implements HttpClientInterface
             ],
         ];
 
-        if ($transaction instanceof SourceModelInterface){
-            $options[\BrokeYourBike\HasSourceModel\Enums\RequestOptions::SOURCE_MODEL] = $transaction;
+        if ($this->getSourceModel() != null){
+            $options[\BrokeYourBike\HasSourceModel\Enums\RequestOptions::SOURCE_MODEL] = $this->getSourceModel();
         }
 
         $uri = (string) $this->resolveUriFor($this->config->getUrl(), 'api/ThirdPartyTransfer/BulkTransfer');
