@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0](https://www.github.com/brokeyourbike/parallex-bank-api-client-php/compare/v0.2.0...v0.3.0) (2026-03-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* source
+
+### Bug Fixes
+
+* source ([d526e66](https://www.github.com/brokeyourbike/parallex-bank-api-client-php/commit/d526e6673b238a55701a576e88d955f47fa642de))
+
 ## [0.2.0](https://www.github.com/brokeyourbike/parallex-bank-api-client-php/compare/v0.1.0...v0.2.0) (2023-08-16)
 
 
